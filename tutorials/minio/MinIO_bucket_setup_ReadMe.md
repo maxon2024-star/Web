@@ -31,27 +31,27 @@ volumes:
 По умолчанию корзины (бакеты) в Minio приватны. Выполните эти команды по очереди, чтобы создать бакет и сделать его публичным:
 
   ```bash
-    # Подключаем клиента к серверу Minio(minio_fastapi - название контейнера из docker-compose.yml)
-    docker exec -it minio_fastapi mc alias set myminio http://localhost:9000 root rootpassword
+    # Подключаем клиента к серверу Minio(minio_storage - название контейнера из docker-compose.yml)
+    docker exec -it minio_storage mc alias set myminio http://localhost:9000 root rootpassword
   ```
 
   ```bash
     # Создаем бакет. 'media' вы можете заменить на название вашей темы (например, 'hotel-assets', 'images')
-    docker exec -it minio_fastapi mc mb myminio/media
+    docker exec -it minio_storage mc mb myminio/media
   ```
 
   ```bash
     # Делаем бакет публичным для чтения. Обязательно замените 'media', если на предыдущем шаге выбрали другое имя!
-    docker exec -it minio_fastapi mc anonymous set public myminio/media
+    docker exec -it minio_storage mc anonymous set public myminio/media
   ```
 
 3. **Загрузка файлов:**
 Зайдите по адресу `http://localhost:9001` (логин `root`, пароль `rootpassword`), перейдите в бакет `media` (или тот, который вы создали) и загрузите туда изображения и видео для услуг. Ссылки на них будут выглядеть так: `http://localhost:9000/media/ваша_картинка.jpg`.
 
-![команды](/assets/image-2.png)
+![команды](./assets/image-2.png)
 
 
 Вид хранилища с загружеными изображениями:
-![медиа](/assets/image-3.png)
+![медиа](./assets/image-3.png)
 
 

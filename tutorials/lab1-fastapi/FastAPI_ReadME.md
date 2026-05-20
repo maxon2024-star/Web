@@ -14,7 +14,8 @@
 5. Коллекции данных (Массивы)
 6. Роутинг и страница «Подробнее» (формат Reels/TikTok)
 7. Подключение статики (CSS и медиа)
-8. FAQ
+8.  Переход на S3-совместимое хранилище (MinIO)
+9. FAQ
 
 ## 1. Подготовка окружения
 
@@ -47,7 +48,7 @@ pip install fastapi uvicorn jinja2 python-multipart aiofiles
 pip install sqlalchemy alembic
 ```
 
-![Установка пакетов](/assets/image.png)
+![Установка пакетов](./assets/image.png)
 
 **Создание файла requirements.txt**
 Чтобы Docker в будущем мог установить те же самые библиотеки при сборке контейнера, нам нужно зафиксировать их в текстовый файл. Выполните команду сохранения зависимостей:
@@ -68,7 +69,7 @@ pip freeze > requirements.txt
 
 Создайте следующую структуру папок и файлов:
 
-![дерево проекта](/assets/image-9.png)
+![дерево проекта](./assets/image-9.png)
 
 ## 3. Первая программа
 
@@ -100,7 +101,7 @@ python main.py
 Откройте браузер и перейдите по адресу `http://127.0.0.1:8000`. Вы должны увидеть JSON-ответ:
 `{"message": "Hello, FastAPI Web Application!"}`
 
-![Hello](/assets/image-10.png)
+![Hello](./assets/image-10.png)
 
 ## 4. Шаблонизация с Jinja2
 
@@ -155,7 +156,7 @@ if __name__ == "__main__":
 ```
 
 Перезагрузите страницу в браузере. Вы увидите отображение чистого HTML (пока без стилей).
-![Чистый HTML](/assets/image-11.png)
+![Чистый HTML](./assets/image-11.png)
 
 
 ## 5. Коллекции данных (Массивы)
@@ -171,7 +172,7 @@ hotels_db = [
         "title": "Отель 'Морской бриз'",
         "price": 5000,
         "description": "Прекрасный отель на берегу моря с панорамными окнами и включенным завтраком. Отличный выбор для отдыха.",
-        "/assets/image_url": "/static/img/hotel.jpg",
+        "./assets/image_url": "/static/img/hotel.jpg",
         "video_url": "/static/img/hotel_vid.mp4"
     },
     {
@@ -179,7 +180,7 @@ hotels_db = [
         "title": "Отель 'Горная вершина'",
         "price": 3500,
         "description": "Уютное шале в горах. Идеально подходит для любителей зимних видов спорта и активного отдыха.",
-        "/assets/image_url": "/static/img/mountains.jpg",
+        "./assets/image_url": "/static/img/mountains.jpg",
         "video_url": "/static/img/mountains.mp4"
     },
 ]
@@ -231,7 +232,7 @@ def get_catalog(request: Request):
 ```
 
 Обновите страницу. Вы увидите списочный вывод данных из вашего Python-массива.
-![Массив](/assets/image-12.png)
+![Массив](./assets/image-12.png)
 
 
 ## 6. Роутинг и страница «Подробнее» (формат Reels/TikTok)
@@ -293,7 +294,7 @@ def get_hotel_detail(request: Request, hotel_id: int):
     {% for hotel in hotels %}
     <li>
         <a href="/hotel/{{ hotel.id }}">
-            <img src="{{ hotel./assets/image_url }}" alt="{{ hotel.title }}" class="hotel-/assets/image">            
+            <img src="{{ hotel../assets/image_url }}" alt="{{ hotel.title }}" class="hotel-./assets/image">            
             <h2>{{ hotel.title }}</h2>
         </a>
         <p>Цена: {{ hotel.price }} руб.</p>
@@ -302,10 +303,10 @@ def get_hotel_detail(request: Request, hotel_id: int):
 </ul>
 ```
 Теперь главная страница выглядит так:
-![Новая главная](/assets/image-13.png)
+![Новая главная](./assets/image-13.png)
 
 И появляется страница подробнее об услуге:
-![Подробнее начальная версия](/assets/image-14.png)
+![Подробнее начальная версия](./assets/image-14.png)
 
 
 ## 7. Подключение статики (CSS)
@@ -444,7 +445,7 @@ a {
     overflow: hidden;
 }
 
-.hotel-/assets/image {
+.hotel-./assets/image {
     width: 100%;             /* Картинка занимает всю ширину карточки */
     height: 200px;           /* Фиксированная высота */
     object-fit: cover;       /* Обрезает картинку без искажения пропорций */
@@ -454,16 +455,54 @@ a {
 ```
 
 Обновите страницу. Вы увидите аккуратную сетку карточек каталога. 
-![каталог](/assets/image-15.png)
+![каталог](./assets/image-15.png)
 
 При клике на карточку откроется полноэкранный вертикальный блок с зацикленным видео и текстовым слоем поверх него.
-![подробнее](/assets/image-16.png)
+![подробнее](./assets/image-16.png)
 
 Для возврата в меню выбора услуг полльзователю достаточно нажать на логотип `Hotel Catalog App`
 
+## 8. Переход на S3-совместимое хранилище (MinIO)
 
+Хранить медиафайлы локально в папке `static/img` удобно на этапе первоначальной верстки и тестирования шаблонов. Однако по требованиям Лабораторной работы №1 все статические медиаресурсы (изображения и видеоролики услуг) должны отдаваться из объектного S3-хранилища.
 
-## 8. FAQ
+Для перевода приложения на работу с MinIO выполните следующие шаги:
+
+1. Разверните и настройте локальное S3-хранилище, руководствуясь **[Мини-гайдом по развертыванию MinIO](/Web/tutorials/minio/MinIO_bucket_setup_ReadMe.md)**.
+2. Загрузите изображения и видеоролики для ваших услуг в созданный публичный бакет (например, `media`) через веб-интерфейс MinIO Console (`http://localhost:9001`).
+3. Модифицируйте вашу коллекцию данных в файле `data/collections.py`, заменив локальные пути на полноценные URL-адреса из вашего S3-хранилища.
+
+Пример изменений в `data/collections.py`:
+
+Было (локальные файлы из папки static):
+```python
+hotels_db = [
+    {
+        "id": 1,
+        "title": "Отель 'Морской бриз'",
+        "price": 5000,
+        "description": "Прекрасный отель на берегу моря...",
+        "image_url": "/static/img/hotel.jpg",
+        "video_url": "/static/img/hotel_vid.mp4"
+    },
+]
+```
+Стало (внешние ссылки на объектное хранилище MinIO):
+```python
+
+hotels_db = [
+    {
+        "id": 1,
+        "title": "Отель 'Морской бриз'",
+        "price": 5000,
+        "description": "Прекрасный отель на берегу моря...",
+        "image_url": "http://localhost:9000/media/hotel.jpg",
+        "video_url": "http://localhost:9000/media/hotel_vid.mp4"
+    },
+]
+```
+
+## 9. FAQ
 
 **Где изучить больше по FastAPI?**
 Существует прекрасная официальная документация по фреймворку: [https://fastapi.tiangolo.com/](https://www.google.com/search?q=https://fastapi.tiangolo.com/)
